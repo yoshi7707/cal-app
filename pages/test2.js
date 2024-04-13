@@ -212,12 +212,42 @@ const MyCalendar = () => {
             )}
             </form>
 
-
-
-
-
-
             <Calendar
+                localizer={localizer}
+                events={events}
+                style={{ height: 1000 }}
+                startAccessor="start"
+                endAccessor="end"
+                // onClick={handleSelectEvent(event)}
+                // onSelectEvent={(event) => setSelectedEvent(event)}
+                onSelectEvent={handleSelectEvent}
+                onSelectSlot={(slotInfo) => {
+                    const { start, end } = slotInfo;
+                    setIsPopupVisible(true);
+                    setSelectedDates({ start, end });
+                    // Handle the selection of an empty slot here
+                    // You can open a popup or modal with the start and end dates pre-filled in input boxes
+                    // You can use the start and end dates to pre-fill the input boxes in your popup
+                    console.log('Selected slot:', start, end);
+                }}
+                eventPropGetter={(event) => {
+                    if (event.title === "「復活の祈り」") {
+                        return {
+                            style: {
+                                backgroundColor: 'red', // This sets the text color to red
+                            }
+                        };
+                    }
+                    return {}; // Return empty for events that don't match
+                }}
+                // showMultiDayTimes
+                popup={true}
+            />
+
+
+
+
+            {/* <Calendar
                 localizer={localizer}
                 events={events}
                 startAccessor="start"
@@ -225,7 +255,9 @@ const MyCalendar = () => {
                 style={{ height: 500 }}
                 onSelectEvent={handleSelectEvent}
             // Include other necessary props
-            />
+            /> */}
+
+
             {isPopupVisible && (
                 <div className="popup">
                     <div className="popup-inner">

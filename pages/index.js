@@ -11,6 +11,15 @@ import styles from '../styles/App.module.css';
 
 const localizer = momentLocalizer(moment);
 
+const EventComponent = ({ event }) => (
+    <div>
+        <div className="smaller-title">{event.title}</div>
+        <div className="smaller-font">導: {event.doushi}</div>
+        <div className="smaller-font">音: {event.onkyo}</div>
+        {/* Add more custom fields here */}
+    </div>
+);
+
 const MyCalendar = () => {
     const [events, setEvents] = useState([]);
     const [title, setTitle] = useState('');
@@ -485,12 +494,24 @@ const MyCalendar = () => {
             <Calendar
                 localizer={localizer}
                 events={events}
+                style={{ height: 1700 }}
                 startAccessor="start"
                 endAccessor="end"
                 // onClick={handleSelectEvent(event)}
                 // onSelectEvent={(event) => setSelectedEvent(event)}
                 onSelectEvent={handleSelectEvent}
-                style={{ height: 1000 }}
+                components={{
+                    event: EventComponent // Use the custom EventComponent to render events
+                }}
+                onSelectSlot={(slotInfo) => {
+                    const { start, end } = slotInfo;
+                    setIsPopupVisible(true);
+                    setSelectedDates({ start, end });
+                    // Handle the selection of an empty slot here
+                    // You can open a popup or modal with the start and end dates pre-filled in input boxes
+                    // You can use the start and end dates to pre-fill the input boxes in your popup
+                    console.log('Selected slot:', start, end);
+                }}
                 eventPropGetter={(event) => {
                     if (event.title === "「復活の祈り」") {
                         return {
@@ -502,7 +523,7 @@ const MyCalendar = () => {
                     return {}; // Return empty for events that don't match
                 }}
                 // showMultiDayTimes
-                // popup={true}
+                popup={true}
             />
 
             {isPopupVisible && (

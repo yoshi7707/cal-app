@@ -3,5 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
+  "/index-forPrint": "pages/index-forPrint.js",
+  "/index-back": "pages/index-back.js",
   "/api/event": "pages/api/event.js"
 }
