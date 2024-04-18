@@ -1,17 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
+import { Calendar, momentLocalizer, DateLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import moment from 'moment';
+import 'moment/locale/ja';
 
-import "../styles/App.module.css";
+import Selectable from '../react-big-calendar/stories/demos/exampleCode/selectable.js';
+
+// import PropTypes from 'prop-types'
+
+import styles from '../styles/App.module.css';
+
+// import "../styles/App.module.css";
 
 const localizer = momentLocalizer(moment);
+
+const EventComponent = ({ event }) => (
+    <div>
+        <div className="smaller-title">{event.title}</div>
+        <div className="smaller-font">導: {event.doushi}</div>
+        <div className="smaller-font">音: {event.onkyo}</div>
+        {/* Add more custom fields here */}
+    </div>
+);
 
 const MyCalendar = () => {
     const [events, setEvents] = useState([]);
     const [title, setTitle] = useState('');
     const [start, setStart] = useState('');
     const [end, setEnd] = useState('');
+
+    const [isStartModified, setIsStartModified] = useState(false);
+    const [isEndModified, setIsEndModified] = useState(false);
+
+    const [selectedDates, setSelectedDates] = useState({ start: null, end: null });
+
     const [newEvent, setNewEvent] = useState({
         doushi: "",
         onkyo: "",
@@ -20,7 +42,102 @@ const MyCalendar = () => {
         comment: ""
     });
 
+    const data = {
+        gyouji: [
+            '「復活の祈り」',
+            '七の日感謝祭',
+            '発展・繁栄系祈願祭',
+            '降魔・病気平癒系祈願祭',
+            'The Missionミーティング',
+            '「心の修行」',
+            '百歳会',
+            'いま学びたい御法話セミナー',
+            'エンゼルプラン',
+            'サクセスNo.1',
+            '親子',
+            '御法話拝聴会',
+            '映画上映会',
+            '伝道ー御法話拝聴会',
+            '新復活祭',
+            'ヘルメス大祭',
+            '5月研修',
+            '家庭ユートピア祈願大祭',
+            '幸福供養祭',
+            '大悟祭',
+            '初転法輪記念祭',
+            '御生誕祭',
+            'エル・カンターレ祭',
+            '街宣',
+            '外部講師セミナー',
+            '本部行事',
+            '集い',
+            '地区会',
+            'チーム会',
+            'ふれあい',
+            'その他'
+        ],
+        doushis: [
+            '田口義明',
+            '馬場重善',
+            '豊田利雄',
+            '北村かおり',
+            '豊田奈奈美',
+            '渡辺和重',
+            '飯田剛',
+            '渡辺聖子',
+            '野口佐知子',
+            '鮫島三重子',
+            '土谷恵',
+            '中島真美',
+            '相良屋昌夫',
+            '神えり',
+            '黒田信子',
+            '雨谷大',
+            '吉田瑞季',
+            '中島謙一郎',
+            'その他',
+        ],
+        onkyos: [
+            '相良屋昌夫',
+            '油井房雄',
+            '豊田奈奈美',
+            '北村かおり',
+            '渡辺聖子',
+            '野口佐知子',
+            '土谷恵',
+            '中島真美',
+            '大森美都里',
+            '武藤啓子',
+            '神えり',
+            'その他',
+            ''
+        ],
+        shikais: [
+            '豊田奈奈美',
+            '北村かおり',
+            '渡辺聖子',
+            '野口佐知子',
+            '土谷恵',
+            '中島真美',
+            'その他',
+            ''
+        ],
+        uketsukes: [
+            '豊田奈奈美',
+            '北村かおり',
+            '渡辺聖子',
+            '野口佐知子',
+            '土谷恵',
+            '中島真美',
+            '鮫島三重子',
+            'その他',
+            ''
+        ],
+    };
+
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isPopupVisible, setIsPopupVisible] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
@@ -75,18 +192,18 @@ const MyCalendar = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         setEvents([...events, {
-            title,
+            title: selectedEvent.title,
             // id: newEvent.id,
-            doushi: newEvent.doushi, // Include doushi from newEvent object
-            onkyo: newEvent.onkyo,
-            shikai: newEvent.shikai,
-            uketsuke: newEvent.uketsuke,
-            comment: newEvent.comment,
+            doushi: selectedEvent.doushi, // Include doushi from newEvent object
+            onkyo: selectedEvent.onkyo,
+            shikai: selectedEvent.shikai,
+            uketsuke: selectedEvent.uketsuke,
+            comment: selectedEvent.comment,
             start: new Date(start),
             end: new Date(end),
         }]);
         setTitle('');
-        setNewEvent({
+        setSelectedEvent({
             title: "",
             doushi: "",
             onkyo: "",
@@ -98,16 +215,16 @@ const MyCalendar = () => {
         setEnd('');
 
         const eventData = {
-            eventName: title,
+            eventName: selectedEvent.title ? selectedEvent.title : "",
             date: "",
-            startTime: start,
-            endTime: end,
+            startTime: selectedDates.start,
+            endTime: selectedDates.end,
             id: newEvent.id ? newEvent.id : "",
-            doushi: newEvent.doushi ? newEvent.doushi : "",
-            onkyo: newEvent.onkyo ? newEvent.onkyo : "",
-            shikai: newEvent.shikai ? newEvent.shikai : "",
-            uketsuke: newEvent.uketsuke ? newEvent.uketsuke : "",
-            comment: newEvent.comment ? newEvent.comment : ""
+            doushi: selectedEvent.doushi ? selectedEvent.doushi : "",
+            onkyo: selectedEvent.onkyo ? selectedEvent.onkyo : "",
+            shikai: selectedEvent.shikai ? selectedEvent.shikai : "",
+            uketsuke: selectedEvent.uketsuke ? selectedEvent.uketsuke : "",
+            comment: selectedEvent.comment ? selectedEvent.comment : ""
         };
         try {
             const response = await fetch('/api/event', {
@@ -122,6 +239,9 @@ const MyCalendar = () => {
                 // Handle success response
                 console.log('Event data submitted successfully!');
                 fetchEvents();
+                setIsPopupVisible(false);
+                setShowPopup(false);
+
                 // window.location.reload();
             } else {
                 // Handle error response
@@ -132,15 +252,33 @@ const MyCalendar = () => {
         }
     };
 
+    const handleOpenPopup = () => {
+        setShowPopup(true);
+    };
+
+    const handleClosePopup = () => {
+        setShowPopup(false);
+    };
+
     const handleEventChange = (propertyName, e) => {
         setSelectedEvent(prevSelectedEvent => ({
             ...prevSelectedEvent,
             [propertyName]: e.target.value,
         }));
+    };
 
+    const handleSelectEvent = (event) => {
+        setSelectedEvent(event);
+        setIsPopupVisible(true);
     };
 
     const handleEditEvent = async () => {
+        // e.preventDefault();
+
+        // Assuming you have default or initial values for start and end
+        const finalStart = isStartModified ? start : selectedEvent.start;
+        const finalEnd = isEndModified ? end : selectedEvent.end;
+
         if (!selectedEvent || !selectedEvent.id) {
             return;
         }
@@ -150,10 +288,11 @@ const MyCalendar = () => {
                 // id: selectedEvent.id,
                 eventName: selectedEvent.title,
                 date: "",
-                startTime: start,
-                endTime: end,
-                // startTime: selectedEvent.start,
-                // endTime: selectedEvent.end,
+                startTime: finalStart,
+                endTime: finalEnd,
+                // startTime: start,
+                // endTime: end,
+                // endTime: selectedEvent.end.toString(),        
                 doushi: selectedEvent.doushi,
                 onkyo: selectedEvent.onkyo,
                 shikai: selectedEvent.shikai,
@@ -173,8 +312,8 @@ const MyCalendar = () => {
             if (response.ok) {
                 // Handle success response
                 console.log('Event data updated successfully!');
+                setIsPopupVisible(false);
                 fetchEvents();
-                // Optionally, you can fetch the updated event data and set it in the state
             } else {
                 // Handle error response
                 console.error('Failed to update event data');
@@ -203,6 +342,7 @@ const MyCalendar = () => {
                 setEvents(updatedEvents);
                 // Update the events state or perform any necessary actions
                 setSelectedEvent(null);
+                setIsPopupVisible(false);
             } else {
                 // Handle error response
                 console.error('Failed to delete event');
@@ -212,172 +352,409 @@ const MyCalendar = () => {
         }
     };
 
-    return (
-        <div>
-            <h2>行事入力</h2>
-            <h4>（行事を選ぶと、カレンダーの下にその情報が表示されます😀）</h4>
+    // const handleSelectSlot = () =>
 
+    // MyCalendar.propTypes = {
+    //     localizer: PropTypes.instanceOf(DateLocalizer),
+    //   }
+
+    return (
+        <div className={styles.App}>
+            <h2>＜越谷支部行事一覧＞</h2>
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    // value={selectedEvent && selectedEvent.title ? selectedEvent.title : ""}
-                    style={{ width: "20%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="行事名"
-                    required
-                />
-                <br /> {/* 改行を挿入 */}
-                <label>開始時間：</label>
-                <input
-                    type="datetime-local"
-                    value={start}
-                    style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                    onChange={(e) => setStart(e.target.value)}
-                    required
-                />
-                <br /> {/* 改行を挿入 */}
-                <label>終了時間：</label>
-                <input
-                    type="datetime-local"
-                    value={end}
-                    style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                    onChange={(e) => setEnd(e.target.value)}
-                    required
-                />
-                <div>
-                    <input type="text"
-                        placeholder="導師"
-                        style={{ width: "20%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                        // value={selectedEvent && selectedEvent.doushi ? selectedEvent.doushi : ""}
-                        onChange={(e) => setNewEvent({ ...newEvent, doushi: e.target.value })} />
-                </div>
-                <div>
-                    <input type="text"
-                        placeholder="音響"
-                        style={{ width: "20%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                        value={newEvent.onkyo}
-                        onChange={(e) => setNewEvent({ ...newEvent, onkyo: e.target.value })} />
-                </div>
-                <div>
-                    <input type="text"
-                        placeholder="司会"
-                        style={{ width: "20%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                        value={newEvent.shikai}
-                        onChange={(e) => setNewEvent({ ...newEvent, shikai: e.target.value })} />
-                </div>
-                <div>
-                    <input type="text"
-                        placeholder="受付"
-                        style={{ width: "20%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                        value={newEvent.uketsuke}
-                        onChange={(e) => setNewEvent({ ...newEvent, uketsuke: e.target.value })} />
-                </div>
-                <div>
-                    <input type="text"
-                        placeholder="備考"
-                        style={{ width: "80%", height: "30px", marginTop: "5px", marginRight: "10px" }}
-                        value={newEvent.comment}
-                        onChange={(e) => setNewEvent({ ...newEvent, comment: e.target.value })} />
-                </div>
-                <button type="submit"
-                    style={{ width: "20%", height: "30px", marginTop: "10px", marginRight: "10px", marginBottom: "20px" }}
-                >行事の追加</button>
+                {showPopup && (
+                    <div className="popup">
+                        <div className="popup-inner">
+                            <h2>行事入力</h2>
+                            <label>行事：</label>
+                            <select
+                                style={{
+                                    width: '60%',
+                                    height: '30px',
+                                    marginTop: '5px',
+                                    marginRight: '10px',
+                                }}
+                                //   value={selectedEvent.title || ''}
+                                onChange={(e) => handleEventChange('title', e)}
+                                required
+                            >
+                                <option value="">行事選択</option>
+                                {data.gyouji.map((gyouji, index) => (
+                                    <option key={index} value={gyouji}>
+                                        {gyouji}
+                                    </option>
+                                ))}
+                            </select>
+                            <br />
+                            <label>開始日:</label>
+<input
+  type="date"
+  value={selectedDates.start ? selectedDates.start.toISOString().slice(0, 10) : ''}
+  style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+  onChange={(e) => {
+    const newDate = new Date(e.target.value);
+    setSelectedDates({ ...selectedDates, start: newDate });
+  }}
+  required
+/>
+
+<label>開始時刻:</label>
+<input
+  type="time"
+  value={selectedDates.start ? selectedDates.start.toISOString().slice(11, 16) : ''}
+  style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+  onChange={(e) => {
+    const [hours, minutes] = e.target.value.split(':');
+    const newDate = new Date(selectedDates.start);
+    newDate.setHours(parseInt(hours));
+    newDate.setMinutes(parseInt(minutes));
+    setSelectedDates({ ...selectedDates, start: newDate });
+  }}
+  required
+/>
+
+<label>終了日:</label>
+<input
+  type="date"
+  value={selectedDates.end ? selectedDates.end.toISOString().slice(0, 10) : ''}
+  style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+  onChange={(e) => {
+    const newDate = new Date(e.target.value);
+    setSelectedDates({ ...selectedDates, end: newDate });
+  }}
+  required
+/>
+
+<label>終了時刻:</label>
+<input
+  type="time"
+  value={selectedDates.end ? selectedDates.end.toISOString().slice(11, 16) : ''}
+  style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+  onChange={(e) => {
+    const [hours, minutes] = e.target.value.split(':');
+    const newDate = new Date(selectedDates.end);
+    newDate.setHours(parseInt(hours));
+    newDate.setMinutes(parseInt(minutes));
+    setSelectedDates({ ...selectedDates, end: newDate });
+  }}
+  required
+/>
+                            <br />
+                            <label>導師：</label>
+                            <select
+                                style={{
+                                    width: '60%',
+                                    height: '30px',
+                                    marginTop: '5px',
+                                    marginRight: '10px',
+                                }}
+                                //   value={selectedEvent.doushi || ''}
+                                onChange={(e) => handleEventChange('doushi', e)}
+                                required
+                            >
+                                <option value="">導師選択</option>
+                                {data.doushis.map((doushi, index) => (
+                                    <option key={index} value={doushi}>
+                                        {doushi}
+                                    </option>
+                                ))}
+                            </select>
+                            <br />
+                            <label>音響：</label>
+                            <select
+                                style={{
+                                    width: '60%',
+                                    height: '30px',
+                                    marginTop: '5px',
+                                    marginRight: '10px',
+                                }}
+                                //   value={selectedEvent.doushi || ''}
+                                onChange={(e) => handleEventChange('onkyo', e)}
+                            // required
+                            >
+                                <option value="">音響選択</option>
+                                {data.onkyos.map((onkyo, index) => (
+                                    <option key={index} value={onkyo}>
+                                        {onkyo}
+                                    </option>
+                                ))}
+                            </select>
+                            <br />
+                            <label>司会：</label>
+                            <select
+                                style={{
+                                    width: '60%',
+                                    height: '30px',
+                                    marginTop: '5px',
+                                    marginRight: '10px',
+                                }}
+                                //   value={selectedEvent.doushi || ''}
+                                onChange={(e) => handleEventChange('shikai', e)}
+                            // required
+                            >
+                                <option value="">司会選択</option>
+                                {data.shikais.map((shikai, index) => (
+                                    <option key={index} value={shikai}>
+                                        {shikai}
+                                    </option>
+                                ))}
+                            </select>
+                            <br />
+                            <label>受付：</label>
+                            <select
+                                style={{
+                                    width: '60%',
+                                    height: '30px',
+                                    marginTop: '5px',
+                                    marginRight: '10px',
+                                }}
+                                //   value={selectedEvent.doushi || ''}
+                                onChange={(e) => handleEventChange('uketsuke', e)}
+                            // required
+                            >
+                                <option value="">受付選択</option>
+                                {data.uketsukes.map((uketsuke, index) => (
+                                    <option key={index} value={uketsuke}>
+                                        {uketsuke}
+                                    </option>
+                                ))}
+                            </select>
+                            <br />
+                            <label>備考：</label>
+                            <input
+                                type="text"
+                                // value={selectedEvent.comment}
+                                style={{ width: "80%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                                onChange={(e) => setSelectedEvent({ ...selectedEvent, comment: e.target.value })}
+                                placeholder="備考"
+                            />
+                            <br />
+                            <button
+                                style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                                onClick={handleSubmit}>
+                                行事の追加
+                            </button>
+                            <button onClick={handleClosePopup}>キャンセル</button>
+                        </div>
+                    </div>
+                )}
             </form>
 
             <Calendar
                 localizer={localizer}
                 events={events}
+                style={{ height: 1700 }}
+                messages={{
+                    today: '今日',
+                    previous: '前へ',
+                    next: '次へ',
+                    month: '月',
+                    week: '週',
+                    day: '日',
+                    agenda: '予定'
+                }}
                 startAccessor="start"
                 endAccessor="end"
                 // onClick={handleSelectEvent(event)}
-                onSelectEvent={(event) => setSelectedEvent(event)}
-                style={{ height: 1000 }}
+                // onSelectEvent={(event) => setSelectedEvent(event)}
+                onSelectEvent={handleSelectEvent}
+                components={{
+                    event: EventComponent // Use the custom EventComponent to render events
+                }}
+                // onSelectSlot={window.alert('Hello!')}
+                onSelectSlot={(slotInfo) => {
+                    const { start, end } = slotInfo;
+                    setShowPopup(true);
+                    setSelectedDates({ start, end });
+                    // Handle the selection of an empty slot here
+                    // You can open a popup or modal with the start and end dates pre-filled in input boxes
+                    // You can use the start and end dates to pre-fill the input boxes in your popup
+                    console.log('Selected slot:', start, end);
+                }}
+                eventPropGetter={(event) => {
+                    if (event.title === "「復活の祈り」") {
+                        return {
+                            style: {
+                                backgroundColor: 'red', // This sets the text color to red
+                            }
+                        };
+                    }
+                    return {}; // Return empty for events that don't match
+                }}
+                // showMultiDayTimes
+                popup={true}
+                selectable
             />
-            {title}, {start}, {end}
 
-            {selectedEvent && (
-                <div>
-                    <h2>＜行事詳細情報＞</h2>
-                    <p>Event ID: {selectedEvent.id ? selectedEvent.id : 'N/A'}</p>
-                    <label>行事名：</label>
-                    <input
-                        type="text"
-                        value={selectedEvent.title ?? ""}
-                        onChange={(e) => handleEventChange('title', e)}
-                    />
-                    <br /> {/* 改行を挿入 */}
-                    <label>開始時間：</label>
-                    <input
-                        type="datetime-local"
-                        // type="text"
-                        value={selectedEvent.startTime}
-                        // onChange={(e) => handleEventChange('startTime', e)}
-                        onChange={(e) => setStart(e.target.value)}
-                        required
-                    />
-                    <br /> {/* 改行を挿入 */}
-                    <label>終了時間：</label>
-                    <input
-                        type="datetime-local"
-                        value={selectedEvent.endTime}
-                        // value={selectedEvent.endTime ? moment(selectedEvent.endTime).format("YYYY-MM-DDTHH:mm") : ""}
-                        onChange={(e) => setEnd(e.target.value)}
-                        required
-                    />
-                    <br /> {/* 改行を挿入 */}
-                    <label>導師：</label>
-                    <input
-                        type="text"
-                        value={selectedEvent.doushi ?? ""}
-                        onChange={(e) => handleEventChange('doushi', e)}
-                    />
-                    <br /> {/* 改行を挿入 */}
-                    <label>音響：</label>
-                    <input
-                        type="text"
-                        value={selectedEvent.onkyo ?? ""}
-                        onChange={(e) => handleEventChange('onkyo', e)}
-                    />
-                    <br /> {/* 改行を挿入 */}
-                    <label>司会：</label>
-                    <input
-                        type="text"
-                        value={selectedEvent.shikai ?? ""}
-                        onChange={(e) => handleEventChange('shikai', e)}
-                    />
-                    <br /> {/* 改行を挿入 */}
-                    <label>受付：</label>
-                    <input
-                        type="text"
-                        value={selectedEvent.uketsuke ?? ""}
-                        onChange={(e) => handleEventChange('uketsuke', e)}
-                    />
-                    <br /> {/* 改行を挿入 */}
-                    <label>備考：</label>
-                    <input
-                        type="text"
-                        value={selectedEvent.comment ?? ""}
-                        onChange={(e) => handleEventChange('comment', e)}
-                    />
-                    <br /> {/* 改行を挿入 */}
+            {isPopupVisible && (
+                <div className="popup">
+                    <div className="popup-inner">
+                        <h2>行事の追加・変更・削除</h2>
+                        <label>行事：{selectedEvent.title || ''}</label>
+                        <select
+                            style={{
+                                width: '50%',
+                                height: '30px',
+                                marginTop: '5px',
+                                marginLeft: '10px',
+                            }}
+                            value={selectedEvent.title || ''}
+                            onChange={(e) => handleEventChange('title', e)}
+                            required
+                        >
+                            <option value="">行事の追加</option>
+                            {data.gyouji.map((gyouji, index) => (
+                                <option key={index} value={gyouji}>
+                                    {gyouji}
+                                </option>
+                            ))}
+                        </select>
+                        <br />
+                        <label>開始時間：{selectedEvent?.start ? selectedEvent.start.toLocaleString('ja-JP') : ""}</label>
+                        {/* <label>開始時間：{selectedEvent?.start?.toString('ja-JP') ?? ""}</label> */}
+                        <input
+                            type="datetime-local"
+                            // value={start}
+                            style={{ width: "70%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                            onChange={(e) => {
+                                console.log('New start time:', e.target.value);
+                                setStart(e.target.value);
+                                setIsStartModified(true);
+                            }}
+                            required
+                        />
+                        <br /> {/* 改行を挿入 */}
+                        <label>終了時間：{selectedEvent?.end ? selectedEvent.end.toLocaleString('ja-JP') : ""}</label>
+                        {/* <label>終了時間：{selectedEvent?.end?.toString() ?? ""}</label> */}
+                        <input
+                            type="datetime-local"
+                            // value={end}
+                            style={{ width: "70%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                            onChange={(e) => {
+                                setEnd(e.target.value)
+                                setIsEndModified(true);
+                            }}
+                            required
+                        />
+                        <br />
+                        <label>導師：{selectedEvent.doushi || ''}</label>
+                        <select
+                            style={{
+                                width: '50%',
+                                height: '30px',
+                                marginTop: '5px',
+                                marginLeft: '10px',
+                            }}
+                            value={selectedEvent.doushi || ''}
+                            onChange={(e) => handleEventChange('doushi', e)}
+                            required
+                        >
+                            <option value="">導師選択</option>
+                            {data.doushis.map((doushi, index) => (
+                                <option key={index} value={doushi}>
+                                    {doushi}
+                                </option>
+                            ))}
+                        </select>
+                        <br />
+                        <label>音響：{selectedEvent.onkyo || ''}</label>
+                        <select
+                            style={{
+                                width: '60%',
+                                height: '30px',
+                                marginTop: '5px',
+                                marginLeft: '10px',
+                            }}
+                            value={selectedEvent.onkyo || ''}
+                            onChange={(e) => handleEventChange('onkyo', e)}
+                        // required
+                        >
+                            <option value="">音響選択</option>
+                            {data.onkyos.map((onkyo, index) => (
+                                <option key={index} value={onkyo}>
+                                    {onkyo}
+                                </option>
+                            ))}
+                        </select>
+                        <br />
+                        <label>司会：{selectedEvent.shikai || ''}</label>
+                        <select
+                            style={{
+                                width: '60%',
+                                height: '30px',
+                                marginTop: '5px',
+                                marginRight: '10px',
+                            }}
+                            value={selectedEvent.shikai || ''}
+                            onChange={(e) => handleEventChange('shikai', e)}
+                        // required
+                        >
+                            <option value="">司会選択</option>
+                            {data.shikais.map((shikai, index) => (
+                                <option key={index} value={shikai}>
+                                    {shikai}
+                                </option>
+                            ))}
+                        </select>
+                        <br />
+                        <label>受付：{selectedEvent.uketsuke || ''}</label>
+                        <select
+                            style={{
+                                width: '60%',
+                                height: '30px',
+                                marginTop: '5px',
+                                marginRight: '10px',
+                            }}
+                            value={selectedEvent.uketsuke || ''}
+                            onChange={(e) => handleEventChange('uketsuke', e)}
+                        // required
+                        >
+                            <option value="">受付選択</option>
+                            {data.uketsukes.map((uketsuke, index) => (
+                                <option key={index} value={uketsuke}>
+                                    {uketsuke}
+                                </option>
+                            ))}
+                        </select>
+                        <br />
+                        <label>備考：{selectedEvent.comment || ''}</label>
+                        <input
+                            type="text"
+                            value={selectedEvent.comment}
+                            style={{ width: "80%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                            onChange={(e) => setSelectedEvent({ ...selectedEvent, comment: e.target.value })}
+                            placeholder="備考"
+                        />
+                        <br />
+                        {/* <button
+                            style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                            onClick={handleSubmit}>
+                            行事の追加
+                        </button> */}
+                        <button
+                            style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                            onClick={handleEditEvent}>
+                            行事の修正
+                        </button>
+                        <button
+                            onClick={handleDeleteEvent}
+                            style={{ width: "30%", height: "30px", marginTop: "10px", marginRight: "10px", marginBottom: "20px" }}
+                        >行事の削除
+                        </button>
+                        {/* <br /> */}
+                        <button
+                            style={{ width: "30%", height: "30px", marginTop: "5px", marginRight: "10px" }}
+                            onClick={() => setIsPopupVisible(false)}>
+                            キャンセル
+                        </button>
+                    </div>
                 </div>
             )}
-
-            {selectedEvent && (
-                <button
-                    onClick={handleDeleteEvent}
-                    style={{ width: "20%", height: "30px", marginTop: "10px", marginRight: "10px", marginBottom: "20px" }}
-                >上の行事の削除
-                </button>
-            )}
-
-            {selectedEvent && (
-                <button
-                    onClick={handleEditEvent}
-                    style={{ width: "20%", height: "30px", marginTop: "10px", marginRight: "10px", marginBottom: "20px" }}
-                >上の内容で修正
-                </button>
-            )}
+            <button
+                style={{ width: "30%", height: "30px", marginTop: "10px", marginRight: "10px", marginBottom: "20px" }}
+                onClick={handleOpenPopup}>
+                新規行事入力
+            </button>
         </div>
     );
 };
