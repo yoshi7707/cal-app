@@ -14,6 +14,8 @@ const DragAndDropCalendar = withDragAndDrop(Calendar)
 // Storybook cannot alias this, so you would use 'react-big-calendar/lib/addons/dragAndDrop/styles.scss'
 // import '../react-big-calendar/src/addons/dragAndDrop/styles.scss'
 
+import SearchComponent from './searchComponent';
+
 import { dateFnsLocalizer } from 'react-big-calendar';
 import dateFns from 'date-fns';
 import format from "date-fns/format";
@@ -172,6 +174,77 @@ const MyCalendar = () => {
       ''
     ],
   };
+
+//drug & copy proccess ==================================================
+  
+  // const eventsForCopy = [
+  //   {
+  //     id: 0,
+  //     title: 'Board meeting',
+  //     start: new Date(2018, 0, 29, 9, 0, 0),
+  //     end: new Date(2018, 0, 29, 13, 0, 0),
+  //     resourceId: [1, 2],
+  //   },
+  //   {
+  //     id: 1,
+  //     title: 'MS training',
+  //     start: new Date(2018, 0, 29, 14, 0, 0),
+  //     end: new Date(2018, 0, 29, 16, 30, 0),
+  //     resourceId: 2,
+  //   },
+  //   {
+  //     id: 2,
+  //     title: 'Team lead meeting',
+  //     start: new Date(2018, 0, 29, 8, 30, 0),
+  //     end: new Date(2018, 0, 29, 12, 30, 0),
+  //     resourceId: 3,
+  //   },
+  //   {
+  //     id: 10,
+  //     title: 'Board meeting',
+  //     start: new Date(2018, 0, 30, 23, 0, 0),
+  //     end: new Date(2018, 0, 30, 23, 59, 0),
+  //     resourceId: 1,
+  //   },
+  //   {
+  //     id: 11,
+  //     title: 'Birthday Party',
+  //     start: new Date(2018, 0, 30, 7, 0, 0),
+  //     end: new Date(2018, 0, 30, 10, 30, 0),
+  //     resourceId: 4,
+  //   },
+  //   {
+  //     id: 12,
+  //     title: 'Board meeting',
+  //     start: new Date(2018, 0, 29, 23, 59, 0),
+  //     end: new Date(2018, 0, 30, 13, 0, 0),
+  //     resourceId: 1,
+  //   },
+  //   {
+  //     id: 13,
+  //     title: 'Board meeting',
+  //     start: new Date(2018, 0, 29, 23, 50, 0),
+  //     end: new Date(2018, 0, 30, 13, 0, 0),
+  //     resourceId: 2,
+  //   },
+  //   {
+  //     id: 14,
+  //     title: 'Board meeting',
+  //     start: new Date(2018, 0, 29, 23, 40, 0),
+  //     end: new Date(2018, 0, 30, 13, 0, 0),
+  //     resourceId: 4,
+  //   },
+  // ]
+  
+  // const resourceMap = [
+  //   { resourceId: 1, resourceTitle: 'Board room' },
+  //   { resourceId: 2, resourceTitle: 'Training room' },
+  //   { resourceId: 3, resourceTitle: 'Meeting room 1' },
+  //   { resourceId: 4, resourceTitle: 'Meeting room 2' },
+  // ]
+
+//drug & copy proccess ==================================================
+
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
@@ -484,6 +557,47 @@ const MyCalendar = () => {
 
   const [myEvents, setMyEvents] = useState(events)
 
+//drug & copy proccess ==================================================
+  // const [myEvents, setMyEvents] = useState(events)
+  // const [copyEvent, setCopyEvent] = useState(true)
+
+  // const toggleCopyEvent = useCallback(() => setCopyEvent((val) => !val), [])
+
+  // const moveEvent = useCallback(
+  //   ({
+  //     event,
+  //     start,
+  //     end,
+  //     resourceId,
+  //     isAllDay: droppedOnAllDaySlot = false,
+  //   }) => {
+  //     const { allDay } = event
+  //     if (!allDay && droppedOnAllDaySlot) {
+  //       event.allDay = true
+  //     }
+  //     if (Array.isArray(event.resourceId)) {
+  //       if (copyEvent) {
+  //         resourceId = [...new Set([...event.resourceId, resourceId])]
+  //       } else {
+  //         const filtered = event.resourceId.filter(
+  //           (ev) => ev !== event.sourceResource
+  //         )
+  //         resourceId = [...new Set([...filtered, resourceId])]
+  //       }
+  //     } else if (copyEvent) {
+  //       resourceId = [...new Set([event.resourceId, resourceId])]
+  //     }
+
+  //     setMyEvents((prev) => {
+  //       const existing = prev.find((ev) => ev.id === event.id) ?? {}
+  //       const filtered = prev.filter((ev) => ev.id !== event.id)
+  //       return [...filtered, { ...existing, start, end, resourceId, allDay }]
+  //     })
+  //   },
+  //   [setMyEvents, copyEvent]
+  // )
+//drug & copy proccess ==================================================
+
   const moveEvent = useCallback(
     async ({ event, start, end, isAllDay: droppedOnAllDaySlot = false }) => {
       const { allDay } = event;
@@ -537,14 +651,80 @@ const MyCalendar = () => {
     [setMyEvents, setEvents]
   );
 
-  const handleEventCopy = ({ event, e }) => {
-    // Handle event copy logic here
-    console.log('Event copied:', event);
-  };
+  const handleEventCopy = useCallback(
+    async ({ event, start, end, isAllDay: droppedOnAllDaySlot = false }) => {
+      const { allDay } = event;
+      if (!allDay && droppedOnAllDaySlot) {
+        event.allDay = true;
+      }
+  
+      // const adjustedStart = new Date(start.getTime() - (start.setHours(start.getHours() - 9)));
+      // const adjustedEnd = new Date(end.getTime() - (end.setHours(end.getHours() - 9)));
+      const adjustedStart = new Date(start.getTime() - (start.getTimezoneOffset() * 60000));
+      const adjustedEnd = new Date(end.getTime() - (end.getTimezoneOffset() * 60000));
+
+      adjustedStart.setHours(adjustedStart.getHours() - 9);
+      adjustedEnd.setHours(adjustedEnd.getHours() - 9);
+  
+      try {
+        const eventData = {
+          eventName: event.title,
+          date: "",
+          startTime: adjustedStart.toISOString(),
+          endTime: adjustedEnd.toISOString(),
+          doushi: event.doushi,
+          onkyo: event.onkyo,
+          shikai: event.shikai,
+          uketsuke: event.uketsuke,
+          comment: event.comment,
+        };
+  
+        const response = await fetch('/api/event', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(eventData),
+        });
+  
+        if (response.ok) {
+          console.log('Event copied successfully!');
+          fetchEvents(); // Fetch the updated event list from the server
+          setMyEvents((prev) => {
+            const existingEvents = prev.filter((ev) => ev.id !== event.id);
+            const newEvent = {
+              ...event,
+              start: adjustedStart,
+              end: adjustedEnd,
+            };
+            return [...existingEvents, newEvent];
+          });
+        } else {
+          console.error('Failed to copy event');
+        }
+      } catch (error) {
+        console.error('Error copying event:', error);
+      }
+    },
+    [fetchEvents, setMyEvents]
+  );
+
   
   const handleEventPaste = ({ event, e }) => {
     // Handle event paste logic here
     console.log('Event pasted:', event);
+  };
+
+  const [filteredEvents, setFilteredEvents] = useState(events);
+
+  const handleSearch = (searchTerm) => {
+    const filtered = events.filter(
+      (event) =>
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.doushi.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.onkyo.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredEvents(filtered);
   };
 
   // const { components, defaultDate, max, views } = useMemo(
@@ -562,6 +742,8 @@ const MyCalendar = () => {
   return (
     <div className={styles.App}>
       <h2>＜越谷支部行事一覧＞</h2>
+      <SearchComponent events={events} data={data} onSearch={handleSearch} />
+      {/* <SearchComponent events={events} onSearch={handleSearch} /> */}
       <form onSubmit={handleSubmit}>
         {showPopup && (
           <div className="popup">
@@ -734,6 +916,7 @@ const MyCalendar = () => {
       <DragAndDropCalendar
         localizer={localizer}
         events={events}
+        // events={eventsForCopy}
         style={{ height: 1600 }}
         min={min}
         max={max}
@@ -803,8 +986,14 @@ const MyCalendar = () => {
         // showMultiDayTimes
         // defaultDate={defaultDate}
         // views={views}
-        onEventCopy={handleEventCopy}
-        onEventPaste={handleEventPaste}
+        // events={myEvents}
+        // onEventDrop={handleEventCopy}
+        // resourceIdAccessor="resourceId"
+        // resources={resourceMap}
+        // resourceTitleAccessor="resourceTitle"
+
+        // onEventCopy={handleEventCopy}
+        // onEventPaste={handleEventPaste}
       />
 
       {isPopupVisible && (
