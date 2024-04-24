@@ -2,10 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/test4": "pages/test4.js",
-  "/index-back": "pages/index-back.js",
-  "/api/event": "pages/api/event.js",
-  "/index-copy": "pages/index-copy.js",
   "/": "pages/index.js",
-  "/index-gemini": "pages/index-gemini.js"
+  "/api/event": "pages/api/event.js"
 }
