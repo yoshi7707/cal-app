@@ -924,8 +924,8 @@ const MyCalendar = () => {
         max={max}
         messages={{
           today: '今日',
-          previous: '前へ',
-          next: '次へ',
+          previous: '◀️',
+          next: '▶️',
           month: '月',
           week: '週',
           day: '日',
@@ -1049,6 +1049,21 @@ const MyCalendar = () => {
               required
             />
             <br />
+            <label>導師：</label>
+{/* <input
+  list="doushis"
+  style={{ width: '50%', height: '30px', marginTop: '5px', marginLeft: '10px' }}
+  value={selectedEvent.doushi || ''}
+  onChange={(e) => handleEventChange('doushi', e.target.value)}
+  required
+/>
+<datalist id="doushis">
+  {data.doushis.map((doushi, index) => (
+    <option key={index} value={doushi}>
+      {doushi}
+    </option>
+  ))}
+</datalist> */}
             <label>導師：{selectedEvent.doushi || ''}</label>
             <select
               style={{
