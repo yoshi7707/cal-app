@@ -3,5 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/index-copy": "pages/index-copy.js",
-  "/api/event": "pages/api/event.js"
+  "/api/event": "pages/api/event.js",
+  "/": "pages/index.js"
 }
